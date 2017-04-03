@@ -1,0 +1,15 @@
+{
+  "name": "jstz-detect",
+  "homepage": "https://github.com/bower-packages/bower-jstz",
+  "version": "1.0.5",
+  "main": "jstz.min.js",
+  "_release": "1.0.5",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.0.5",
+    "commit": "3633c257f6233e185f701bb58cfb60ecb36c6148"
+  },
+  "_source": "https://github.com/amitmawkin/bower-jstz.git",
+  "_target": "~1.0.5",
+  "_originalSource": "hygieia-jstz-detect"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "karma-jasmine",
+  "homepage": "https://github.com/karma-runner/karma-jasmine",
+  "version": "0.3.8",
+  "_release": "0.3.8",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.8",
+    "commit": "270396d1804a1f988574bb0cca8a7682adbd1ed9"
+  },
+  "_source": "https://github.com/karma-runner/karma-jasmine.git",
+  "_target": "0.3.8",
+  "_originalSource": "karma-jasmine"
+}

@@ -1,0 +1,1 @@
+java -Xmx800m -jar C:\Users\nayaksau\Documents\Hygieia-master\api\target\api.jar --spring.config.location=C:\Users\nayaksau\Documents\Hygieia-master\api\application.properties 

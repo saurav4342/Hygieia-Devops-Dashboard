@@ -1,0 +1,6 @@
+{
+    "directory": "fixtures",
+	 "proxy": "http://ES%5Cnayaksau:Password@123@11.164.4.21:8080",
+  "https-proxy": "http://ES%5Cnayaksau:Password@123@11.164.4.21:8080",
+  "strict-ssl": false
+}
