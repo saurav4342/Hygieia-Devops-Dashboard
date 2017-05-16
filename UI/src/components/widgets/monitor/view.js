@@ -10,12 +10,33 @@
     function monitorViewController($scope, monitorData, DashStatus, $modal, $q) {
         /*jshint validthis:true */
         var ctrl = this;
-
+       
         // public variables
+		 ctrl.lineOptions = {
+            plugins: [
+                Chartist.plugins.gridBoundaries(),
+                Chartist.plugins.lineAboveArea(),
+                Chartist.plugins.tooltip(),
+                Chartist.plugins.pointHalo()
+            ],
+			
+            
+          donutWidth: 70,
+          donutSolid: true,
+          startAngle: 270,
+           showLabel: true,
+		   height:200,
+		   width:300
+        };
         ctrl.statuses = DashStatus;
         ctrl.services = [];
         ctrl.dependencies = [];
-
+		var errorCountArray=[];
+		var label=[];
+        ctrl.lineData= {
+		labels:label,
+        series: errorCountArray
+		};
         // public methods
         ctrl.openStatusWindow = openStatusWindow;
         ctrl.hasMessage = hasMessage;
@@ -43,7 +64,7 @@
                 controller: 'monitorStatusController',
                 controllerAs: 'ctrl',
                 scope: $scope,
-                size: 'md',
+                size: 'lg',
                 resolve: {
                     // make sure modal has access to the status and selected
                     statuses: function () {
@@ -52,8 +73,14 @@
                     service: function () {
                         return {
                             id: service.id,
-                            status: service.status,
-                            message: service.message
+                           pod:service.pod,
+  						  errorCount:service.errorCount,
+						  ucids:service.ucidCount,
+						  percentage:service.percentage,
+						  sysCodes:service.syscodes,
+						  app:service.app,
+						  custids:service.custids,
+						  errorMessages:service.errorMessages
                         };
                     }
                 }
@@ -93,7 +120,8 @@
             function get(services, dependency) {
                 return _.map(services, function (item) {
                     var name = item.name;
-
+                    errorCountArray.push(item.errorCount);
+					label.push(item.pod);
                     if (dependency && item.applicationName) {
                         name = item.applicationName + ': ' + name;
                     }
@@ -118,7 +146,14 @@
                         id: item.id,
                         name: name,
                         status: item.status,
-                        message: item.message
+                        app: item.app,
+						pod:item.pod,
+						errorCount:item.errorCount,
+						ucids:item.custIDs.length,
+						custids:item.custIDs,
+						syscodes:item.syscodes,
+						percentage:item.percentage,
+						errorMessages:item.errorMessages
                     };
                 });
             }
@@ -141,12 +176,13 @@
         ctrl.service = service;
         ctrl.statuses = statuses;
         ctrl.setStatus = setStatus;
-
+        
         // public methods
         ctrl.submit = submit;
 
         function setStatus(status) {
             ctrl.service.status = status;
+			
         }
 
         function submit() {

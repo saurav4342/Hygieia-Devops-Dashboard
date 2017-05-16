@@ -169,26 +169,32 @@ public class FeatureServiceImpl implements FeatureService {
 
 		CollectorItem item = component.getCollectorItems().get(CollectorType.ScopeOwner).get(0);
 		
-		List<Feature> relevantFeatureEstimates = getFeaturesForCurrentSprints(teamId, agileType.isPresent()? agileType.get() : null, true);
-		
-		// epicID : epic information (in the form of a Feature object)
+		List<Feature> relevantFeatureEstimates = featureRepository.findByActiveEndingSprints(teamId, getCurrentISODateTime());
 		Map<String, Feature> epicIDToEpicFeatureMap = new HashMap<>();
+		if(agileType.equals("scrum")){
+			
+		}
+		else{
+		// epicID : epic information (in the form of a Feature object)
+	
 		
 		for (Feature tempRs : relevantFeatureEstimates) {
-			String epicID = tempRs.getsEpicID();
+			String sId = tempRs.getsId();
 			
-			if (StringUtils.isEmpty(epicID))
+			if (StringUtils.isEmpty(sId))
 				continue;
-			
-			Feature feature = epicIDToEpicFeatureMap.get(epicID);
+			if(!tempRs.getsStatus().equals("In-Progress")){
+				continue;
+			}
+			Feature feature = epicIDToEpicFeatureMap.get(sId);
 			if (feature == null) {
 				feature = new Feature();
 				feature.setId(null);
-				feature.setsEpicID(epicID);
-				feature.setsEpicNumber(tempRs.getsEpicNumber());
-				feature.setsEpicName(tempRs.getsEpicName());
+				feature.setsEpicID(sId);
+				feature.setsEpicNumber(tempRs.getsNumber());
+				feature.setsEpicName(tempRs.getsName());
 				feature.setsEstimate("0");
-				epicIDToEpicFeatureMap.put(epicID, feature);
+				epicIDToEpicFeatureMap.put(sId, feature);
 			}
 			
 			// if estimateMetricType is hours accumulate time estimate in minutes for better precision ... divide by 60 later
@@ -203,8 +209,9 @@ public class FeatureServiceImpl implements FeatureService {
 				f.setsEstimate(String.valueOf(Integer.valueOf(f.getsEstimate()) / 60));
 			}
 		}
-		
+		}
 		Collector collector = collectorRepository.findOne(item.getCollectorId());
+	
 		return new DataResponse<>(new ArrayList<>(epicIDToEpicFeatureMap.values()), collector.getLastExecuted());
 	}
 	
@@ -381,12 +388,12 @@ public class FeatureServiceImpl implements FeatureService {
 			totalEstimate += estimate;
 			if (tempStatus != null) {
 				switch (tempStatus) {
-					case "in progress":
-					case "waiting":
-					case "impeded":
+					case "in-progress":
+					//case "defined":
+					case "blocked":
 						wipEstimate += estimate;
 					break;
-					case "done":
+					case "completed":
 					case "accepted":
 						doneEstimate += estimate;
 					break;
@@ -489,7 +496,7 @@ public class FeatureServiceImpl implements FeatureService {
 		} else {
 			// default to story points since that should be the most common use case
 			if (!StringUtils.isEmpty(feature.getsEstimate())) {
-				rt = Integer.parseInt(feature.getsEstimate());
+				rt = (int)Double.parseDouble(feature.getsEstimate());
 			}
 		}
 		

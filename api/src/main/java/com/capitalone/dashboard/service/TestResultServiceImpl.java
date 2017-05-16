@@ -1,5 +1,6 @@
 package com.capitalone.dashboard.service;
 
+import com.capitalone.dashboard.collector.CollectorTask;
 import com.capitalone.dashboard.misc.HygieiaException;
 import com.capitalone.dashboard.model.*;
 import com.capitalone.dashboard.repository.CollectorRepository;
@@ -12,6 +13,8 @@ import com.google.common.collect.Lists;
 import com.mysema.query.BooleanBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,7 +33,7 @@ public class TestResultServiceImpl implements TestResultService {
     private final ComponentRepository componentRepository;
     private final CollectorRepository collectorRepository;
     private final CollectorService collectorService;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(CollectorTask.class);
     @Autowired
     public TestResultServiceImpl(TestResultRepository testResultRepository,
                                  ComponentRepository componentRepository,
@@ -50,6 +53,9 @@ public class TestResultServiceImpl implements TestResultService {
         }
         List<TestResult> result = new ArrayList<>();
         validateAllCollectorItems(request, component, result);
+        for(TestResult res:result){
+        	LOGGER.info(res.getDescription());
+        }
         //One collector per Type. get(0) is hardcoded.
         if (!CollectionUtils.isEmpty(component.getCollectorItems().get(CollectorType.Test)) && (component.getCollectorItems().get(CollectorType.Test).get(0) != null)) {
             Collector collector = collectorRepository.findOne(component.getCollectorItems().get(CollectorType.Test).get(0).getCollectorId());
