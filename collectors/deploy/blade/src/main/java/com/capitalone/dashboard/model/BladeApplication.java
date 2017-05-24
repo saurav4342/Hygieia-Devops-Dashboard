@@ -1,6 +1,6 @@
 package com.capitalone.dashboard.model;
 
-public class UDeployApplication extends CollectorItem {
+public class BladeApplication extends CollectorItem {
       private String applicationName ;
     private String applicationId ;
 

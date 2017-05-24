@@ -34,7 +34,7 @@ public ServiceArgs getCredentials(){
 		ServiceArgs loginArgs = new ServiceArgs();
 		loginArgs.setUsername(splunkSettings.getUsername());
 		loginArgs.setPassword(splunkSettings.getPassword());
-		loginArgs.setHost("splunkcdl.es.ad.adp.com");
+		loginArgs.setHost(splunkSettings.getUrl());
 		//loginArgs.setPort(8089);
 		return loginArgs;
 		
@@ -43,7 +43,7 @@ public ServiceArgs getCredentials(){
 public ServiceArgs getApplication(){
 	
 	ServiceArgs namespace = new ServiceArgs();
-	namespace.setApp("ezlm_main");
+	namespace.setApp(splunkSettings.getApp());
 	return namespace;
 	
 }
@@ -52,7 +52,7 @@ public ServiceArgs getApplication(){
 public InputStream runSavedSearch() throws InterruptedException{
 	
 		Service service = Service.connect(getCredentials());
-		SavedSearch savedSearch = service.getSavedSearches(getApplication()).get("Hygieia");
+		SavedSearch savedSearch = service.getSavedSearches(getApplication()).get(splunkSettings.getSavedSearch());
 		Job jobSavedSearch = null;
 	    jobSavedSearch = savedSearch.dispatch();
 		// Wait for the job to finish

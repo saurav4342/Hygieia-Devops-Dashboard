@@ -169,7 +169,7 @@ public class FeatureServiceImpl implements FeatureService {
 
 		CollectorItem item = component.getCollectorItems().get(CollectorType.ScopeOwner).get(0);
 		
-		List<Feature> relevantFeatureEstimates = featureRepository.findByActiveEndingSprints(teamId, getCurrentISODateTime());
+		List<Feature> relevantFeatureEstimates = getFeaturesForCurrentSprints(teamId, agileType.isPresent()? agileType.get() : null, true);
 		Map<String, Feature> epicIDToEpicFeatureMap = new HashMap<>();
 		if(agileType.equals("scrum")){
 			
@@ -179,22 +179,20 @@ public class FeatureServiceImpl implements FeatureService {
 	
 		
 		for (Feature tempRs : relevantFeatureEstimates) {
-			String sId = tempRs.getsId();
+			String epicID = tempRs.getsEpicID();
 			
-			if (StringUtils.isEmpty(sId))
+			if (StringUtils.isEmpty(epicID))
 				continue;
-			if(!tempRs.getsStatus().equals("In-Progress")){
-				continue;
-			}
-			Feature feature = epicIDToEpicFeatureMap.get(sId);
+			
+			Feature feature = epicIDToEpicFeatureMap.get(epicID);
 			if (feature == null) {
 				feature = new Feature();
 				feature.setId(null);
-				feature.setsEpicID(sId);
-				feature.setsEpicNumber(tempRs.getsNumber());
-				feature.setsEpicName(tempRs.getsName());
+				feature.setsEpicID(epicID);
+				feature.setsEpicNumber(tempRs.getsEpicNumber());
+				feature.setsEpicName(tempRs.getsEpicName());
 				feature.setsEstimate("0");
-				epicIDToEpicFeatureMap.put(sId, feature);
+				epicIDToEpicFeatureMap.put(epicID, feature);
 			}
 			
 			// if estimateMetricType is hours accumulate time estimate in minutes for better precision ... divide by 60 later

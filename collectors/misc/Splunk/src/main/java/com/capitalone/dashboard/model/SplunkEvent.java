@@ -15,6 +15,7 @@ private int uSysCodeCount;
 private List<String> custIDs;
 private List<String> syscodes;
 private List<String> errorMessages;
+
 public void setCustIDs(List<String> custIDs){
 	this.custIDs=custIDs;
 }

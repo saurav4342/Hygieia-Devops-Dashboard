@@ -57,6 +57,7 @@ public void collect(SplunkCollector collector) {
  
 
         long start = System.currentTimeMillis();
+        log(splunkSettings.getUrl());
         try {
 			List<SplunkEvent> eventList = splunkClient.getSplunkEventList();
 			cleanEvents();
@@ -67,6 +68,7 @@ public void collect(SplunkCollector collector) {
 			LOG.info("Error");
 		}
         log("Finished", start);
+        
     }
 
 public void cleanEvents(){

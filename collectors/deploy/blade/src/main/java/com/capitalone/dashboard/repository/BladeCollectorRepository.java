@@ -1,9 +1,9 @@
 package com.capitalone.dashboard.repository;
 
-import com.capitalone.dashboard.model.UDeployCollector;
+import com.capitalone.dashboard.model.BladeCollector;
 
 /**
- * Repository for {@link UDeployCollector}.
+ * Repository for {@link BladeCollector}.
  */
-public interface UDeployCollectorRepository extends BaseCollectorRepository<UDeployCollector> {
+public interface BladeCollectorRepository extends BaseCollectorRepository<BladeCollector> {
 }

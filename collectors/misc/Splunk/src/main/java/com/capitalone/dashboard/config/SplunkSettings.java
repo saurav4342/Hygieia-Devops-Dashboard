@@ -13,7 +13,9 @@ public class SplunkSettings {
 	    private String cron;
 	    private String username;
 	    private String password;
-	    
+	    private String url;
+	    private String app;
+	    private String savedSearch;
 
 	    public String getCron() {
 	        return cron;
@@ -37,6 +39,24 @@ public class SplunkSettings {
 
 	    public void setPassword(String password) {
 	        this.password = password;
+	    }
+	    public String getUrl(){
+	    	return url;
+	    }
+	    public void setUrl(String url){
+	    	this.url=url;
+	    }
+	    public String getApp(){
+	    	return app;
+	    }
+	    public void setApp(String app){
+	    	this.app=app;
+	    }
+	    public String getSavedSearch(){
+	    	return savedSearch;
+	    }
+	    public void getSavedSearch(String savedSearch){
+	    	this.savedSearch=savedSearch;
 	    }
 	}
 

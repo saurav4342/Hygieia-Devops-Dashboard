@@ -14,6 +14,7 @@ public class SubversionSettings {
     private String username;
     private String password;
     private int commitThresholdDays;
+    private String url;
 
     public String getCron() {
         return cron;
@@ -22,7 +23,12 @@ public class SubversionSettings {
     public void setCron(String cron) {
         this.cron = cron;
     }
-
+    public String getUrl(){
+	return url;
+    }
+    public void setUrl(String url){
+	this.url=url;
+    }
     public String getUsername() {
         return username;
     }

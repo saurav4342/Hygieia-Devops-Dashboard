@@ -8,6 +8,14 @@ private String lastDeploymentTime;
 private String errorcount;
 private String deploymentStatus;
 private String latestStage;
+private String deploymentId;
+
+public String getDeploymentId(){
+	return deploymentId;
+}
+public void setDeploymentId(String deploymentId){
+	this.deploymentId = deploymentId;
+}
 public void setHostCount(String hostcount){
 	this.hostcount=hostcount;
 }

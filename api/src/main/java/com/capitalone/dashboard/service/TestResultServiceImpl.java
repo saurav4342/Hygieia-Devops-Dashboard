@@ -53,8 +53,8 @@ public class TestResultServiceImpl implements TestResultService {
         }
         List<TestResult> result = new ArrayList<>();
         validateAllCollectorItems(request, component, result);
-        for(TestResult res:result){
-        	LOGGER.info(res.getDescription());
+        for(TestResult results:result){
+        	LOGGER.info(results.getDescription());
         }
         //One collector per Type. get(0) is hardcoded.
         if (!CollectionUtils.isEmpty(component.getCollectorItems().get(CollectorType.Test)) && (component.getCollectorItems().get(CollectorType.Test).get(0) != null)) {
@@ -84,6 +84,7 @@ public class TestResultServiceImpl implements TestResultService {
 
             // add all test result repos
             addAllTestResultRepositories(request, result, testResult, builder);
+            
         }
     }
 

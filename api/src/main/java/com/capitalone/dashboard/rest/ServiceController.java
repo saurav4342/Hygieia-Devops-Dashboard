@@ -4,7 +4,6 @@ import com.capitalone.dashboard.editors.CaseInsensitiveServiceStatusEditor;
 import com.capitalone.dashboard.model.DataResponse;
 import com.capitalone.dashboard.model.Service;
 import com.capitalone.dashboard.model.ServiceStatus;
-import com.capitalone.dashboard.model.SplunkEvent;
 import com.capitalone.dashboard.request.ServiceRequest;
 import com.capitalone.dashboard.service.ServiceService;
 import org.bson.types.ObjectId;
@@ -44,15 +43,15 @@ public class ServiceController {
     }
 
     @RequestMapping(value = "/service", method = GET, produces = APPLICATION_JSON_VALUE)
-    public Iterable<SplunkEvent> services() {
+    public Iterable<Service> services() {
         return serviceService.all();
     }
 
     @RequestMapping(value = "/dashboard/{id}/service", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DataResponse<Map<String, List<SplunkEvent>>> dashboardServices(@PathVariable ObjectId id) {
-        Map<String, List<SplunkEvent>> response = new HashMap<>();
+    public DataResponse<Map<String, List<Service>>> dashboardServices(@PathVariable ObjectId id) {
+        Map<String, List<Service>> response = new HashMap<>();
         response.put("services", serviceService.dashboardServices(id));
-        //response.put("dependencies", serviceService.dashboardDependentServices(id));
+        response.put("dependencies", serviceService.dashboardDependentServices(id));
         return new DataResponse<>(response, System.currentTimeMillis());
     }
 

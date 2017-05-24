@@ -78,9 +78,9 @@ public class DefaultSubversionClient implements SubversionClient {
     }
 
     private SVNRepository getSvnRepository(String url) throws SVNException {
-    	String userUrl = "http://svn-mas.es.oneadp.com/svn/TLM_ezlm";
-    	String userName="nayaksau";
-    	String password = "s4ur4vn4y4k#";
+    	String userUrl = settings.getUrl();
+    	String userName=settings.getUsername();
+    	String password = settings.getPassword();
         SVNRepository repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(userUrl));
         ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(
                 userName, password);

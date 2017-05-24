@@ -1,1 +1,1 @@
-java -jar C:\Hygieia-master\api\target\api.jar 
+java -jar C:\Hygieia-master\api\target\api.jar --spring.config.location=C:\Hygieia-master\api\application.properties 

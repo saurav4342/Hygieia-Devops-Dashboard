@@ -9,7 +9,8 @@ import java.util.List;
 import com.capitalone.dashboard.model.Environment;
 import com.capitalone.dashboard.model.EnvironmentComponent;
 import com.capitalone.dashboard.model.SplunkEvent;
-import com.capitalone.dashboard.model.UDeployApplication;
+import com.capitalone.dashboard.repository.BladeApplicationRepository;
+import com.capitalone.dashboard.model.BladeApplication;
 import com.splunk.HttpService;
 import com.splunk.Job;
 import com.splunk.ResultsReaderXml;
@@ -18,12 +19,12 @@ import com.splunk.SavedSearch;
 import com.splunk.Service;
 import com.splunk.ServiceArgs;
 
-public class DeploymentDataFactory {
-	
-	private List<Environment> envList = new ArrayList<Environment>();
-	private List<UDeployApplication> appList = new ArrayList<UDeployApplication>();
-	private List<EnvironmentComponent> envComponent = new ArrayList<EnvironmentComponent>();
-	    public List<SplunkEvent> connectToSplunk() throws InterruptedException, IOException{
+public class DeploymentDataFactory { 
+	private final BladeApplicationRepository appRepository;
+	public DeploymentDataFactory( BladeApplicationRepository appRepository){
+		this.appRepository=appRepository;
+	}
+	public List<SplunkEvent> connectToSplunk() throws InterruptedException, IOException{
 		List<SplunkEvent> splunkEventList = new ArrayList<SplunkEvent>();
 	    HttpService.setSslSecurityProtocol( SSLSecurityProtocol.TLSv1_2 );
 		ServiceArgs loginArgs = new ServiceArgs();
@@ -37,7 +38,7 @@ public class DeploymentDataFactory {
 		ServiceArgs namespace = new ServiceArgs();
 		namespace.setApp("ezlm_main");
 	
-		SavedSearch savedSearch = service.getSavedSearches(namespace).get("TLM CDL daily deployment status");
+		SavedSearch savedSearch = service.getSavedSearches(namespace).get("Bladecollector");
 		Job jobSavedSearch = savedSearch.dispatch();
 		 
 		// Wait for the job to finish
@@ -56,47 +57,24 @@ public class DeploymentDataFactory {
 		        splunkEvent.setErrorCount(event.get("ErrorCount"));
 		        splunkEvent.setdeploymentStatus(event.get("DeploymentStatus"));
 		        splunkEvent.setLatestStage(event.get("LatestStage"));
+		        splunkEvent.setDeploymentId(event.get("DeploymentID"));
 		        splunkEventList.add(splunkEvent);
 		    }
 		    return splunkEventList;
 		}
-	public void createApplications(List<SplunkEvent> splunkEventList){
-		String pod="",app="";
-		
-		for(SplunkEvent event:splunkEventList){
-			pod = event.getPod();
-			
-			if(pod.contains("TLM")){
-				app="TLM";
+	
+	public List<BladeApplication> createApplications(List<SplunkEvent> splunkEventList){
+		List<BladeApplication> appList = new ArrayList<BladeApplication>();
+		for(SplunkEvent event: splunkEventList){
+			if(appRepository.findByApplicationId(event.getPod())==null){
+				BladeApplication app = new BladeApplication();
+				app.setApplicationId(event.getPod());
+				app.setApplicationName(event.getPod());
+		        appList.add(app);
 			}
-			else if(pod.contains("WFN")){
-				app="WFN";
-			}
-			else if(pod.contains("AP")){
-				app="AP";
-			}
-			else if(pod.contains("HDC")){
-				app="HDC";
-			}
-			else if(pod.contains("ETC")){
-				app="ETC";
-			}
-			Environment environment = new Environment(pod,pod);
-			UDeployApplication application = new UDeployApplication();
-			EnvironmentComponent component = new EnvironmentComponent();
-			application.setApplicationId(app);
-			application.setApplicationName(app);
-			application.setDescription(app);
-			envList.add(environment);
-			appList.add(application);
 		}
-		
-	}
-	public List<UDeployApplication> returnApp(){
 		return appList;
 	}
-	public List<Environment> returnEnv(){
-		return envList;
-	}
 	
+
 }
