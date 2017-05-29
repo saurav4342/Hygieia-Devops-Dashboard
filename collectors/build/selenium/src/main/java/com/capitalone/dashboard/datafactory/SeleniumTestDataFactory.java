@@ -9,6 +9,9 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.capitalone.dashboard.collector.SeleniumTestSettings;
 import com.capitalone.dashboard.model.TestCapability;
 import com.capitalone.dashboard.model.TestCase;
 import com.capitalone.dashboard.model.TestCaseStatus;
@@ -18,10 +21,16 @@ import com.capitalone.dashboard.model.TestSuite;
 import com.capitalone.dashboard.model.TestSuiteType;
 
 public class SeleniumTestDataFactory {
+	
+	private final SeleniumTestSettings seleniumSettings;
+	@Autowired
+	public SeleniumTestDataFactory(SeleniumTestSettings seleniumSettings){
+		this.seleniumSettings = seleniumSettings;
+	}
 	public TestResult getTestResult() throws IOException{
 		List<TestCapability> capabilities = getTestCapabilities();
 		TestResult testResult = new TestResult();
-        testResult.setDescription("Test Result desciption");
+        testResult.setDescription("Test Result description");
 		testResult.getTestCapabilities().addAll(capabilities);  //add all capabilities
         testResult.setTotalCount(capabilities.size());
         int testCapabilitySkippedCount = 0, testCapabilitySuccessCount = 0, testCapabilityFailCount = 0;
@@ -94,7 +103,7 @@ public class SeleniumTestDataFactory {
 	}
 	public List<String> getFileNames() throws IOException{
 		List<String> fileNames = new ArrayList<String>();
-		URL uri  = new URL("file://cdltlmdash2/Regression/");
+		URL uri  = new URL(seleniumSettings.getServer());
 		URLConnection urlc = uri.openConnection();
 		InputStream files = urlc.getInputStream();
 		String line = null;
@@ -113,7 +122,7 @@ public class SeleniumTestDataFactory {
 		List<TestSuite> suiteList = new ArrayList<TestSuite>();
 		List<String> fileNames = getFileNames();
 		for(String name:fileNames){
-		String url="file://cdltlmdash2/Regression/"+name;
+		String url=seleniumSettings.getServer()+name;
 		URL uri = new URL(url);
 		URLConnection urlc = uri.openConnection();
 		InputStream files = urlc.getInputStream();
@@ -179,7 +188,7 @@ int failedCasesCount=0,passedCasesCount=0,unknownCount=0;
 		return suite;
 	}
 	public Long getDuration(String duration){
-		String[] time = duration.split(",");
+		String[] time = duration.split(":");
 		int hours = Integer.parseInt(time[0]);
 		int minutes = Integer.parseInt(time[1]);
 		int seconds = Integer.parseInt(time[2]);

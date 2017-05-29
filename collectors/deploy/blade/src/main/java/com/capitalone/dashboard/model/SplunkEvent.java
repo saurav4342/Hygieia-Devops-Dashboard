@@ -1,13 +1,13 @@
 package com.capitalone.dashboard.model;
 
+import java.util.List;
+
 public class SplunkEvent {
-private String hostcount;
+private String host;
 private String pod;
-private String warncount;
+private List<String> components;
 private String lastDeploymentTime;
-private String errorcount;
 private String deploymentStatus;
-private String latestStage;
 private String deploymentId;
 
 public String getDeploymentId(){
@@ -16,46 +16,38 @@ public String getDeploymentId(){
 public void setDeploymentId(String deploymentId){
 	this.deploymentId = deploymentId;
 }
-public void setHostCount(String hostcount){
-	this.hostcount=hostcount;
+public void setHost(String host){
+	this.host=host;
 }
 public void setPod(String pod){
 	this.pod=pod;
 }
-public void setwarncount(String warncount){
-	this.warncount=warncount;
+public void setComponents(List<String> components){
+	this.components=components;
 }
 public void setLastDeploymentTime(String lastDeploymentTime){
 	this.lastDeploymentTime=lastDeploymentTime;
 }
-public void setErrorCount(String errorcount){
-	this.errorcount=errorcount;
-}
+
 public void setdeploymentStatus(String deploymentStatus){
 	this.deploymentStatus=deploymentStatus;
 }
-public void setLatestStage(String latestStage){
-	this.latestStage=latestStage;
-}
-public String getHostCount(){
-	return hostcount;
+
+public String getHost(){
+	return host;
 }
 public String getPod(){
 	return pod;
 }
-public String getWarnCount(){
-	return warncount;
+public List<String> getComponents(){
+	return components;
 }
 public String getLastDeploymentTime(){
 	return lastDeploymentTime;
 }
-public String getErrorCount(){
-	return errorcount;
-}
+
 public String getDeploymentStatus(){
 	return deploymentStatus;
 }
-public String getLatestStage(){
-	return latestStage;
-}
+
 }

@@ -2,7 +2,6 @@ package com.capitalone.dashboard.collector;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
 /**
  * Bean to hold settings specific to the Jenkins collector.
@@ -10,11 +9,11 @@ import java.util.List;
  * Created by ltm688 on 2/12/15.
  */
 @Component
-@ConfigurationProperties(prefix = "jenkins-cucumber")
+@ConfigurationProperties(prefix = "selenium")
 public class SeleniumTestSettings {
 
     private String cron;
-    private List<String> servers;
+    private String server;
     private String cucumberJsonRegex = "cucumber.json";
     private String username;
     private String apiKey;
@@ -28,12 +27,12 @@ public class SeleniumTestSettings {
         this.cron = cron;
     }
 
-    public List<String> getServers() {
-        return servers;
+    public String getServer() {
+        return server;
     }
 
-    public void setServers(List<String> servers) {
-        this.servers = servers;
+    public void setServer(String server) {
+        this.server = server;
     }
 
     public String getCucumberJsonRegex() {

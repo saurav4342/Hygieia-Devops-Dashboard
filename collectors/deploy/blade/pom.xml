@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <name>${project.groupId}:${project.artifactId}</name>
-  <description>Splunk Collector Microservice</description>
+  <description>Blade Collector Microservice</description>
   <url>https://github.com/capitalone/Hygieia</url>
   <packaging>jar</packaging>
 
-  <artifactId>splunk-collector</artifactId>
+  <artifactId>blade-collector</artifactId>
 
   <parent>
     <groupId>com.capitalone.dashboard</groupId>
