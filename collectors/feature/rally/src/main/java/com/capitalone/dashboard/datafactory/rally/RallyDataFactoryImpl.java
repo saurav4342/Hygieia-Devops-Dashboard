@@ -69,7 +69,7 @@ QueryRequest request = new QueryRequest("Projects");
    if(response.getResults()!=null){
    for(JsonElement result : response.getResults()){
 	   JsonObject project = result.getAsJsonObject();
-	   if(project.get("Name").getAsString().contains("TLM")){
+	   if(project.get("Name").getAsString().contains(featureSettings.getApplicationName())){
 	   ScopeOwnerCollectorItem user = new ScopeOwnerCollectorItem();   
 	  user.setTeamId((project.get("ObjectID").getAsString()));
 	  user.setName(project.get("Name").getAsString());
