@@ -3,6 +3,8 @@ package com.capitalone.dashboard.collector;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
+
 import com.capitalone.dashboard.datafactory.SeleniumTestDataFactory;
 import com.capitalone.dashboard.model.SeleniumTestCollector;
 import com.capitalone.dashboard.model.TestResult;
@@ -10,10 +12,10 @@ import com.capitalone.dashboard.repository.BaseCollectorRepository;
 import com.capitalone.dashboard.repository.SeleniumTestCollectorRepository;
 import com.capitalone.dashboard.repository.TestResultRepository;
 
-
+@Component
 public class SeleniumTestCollectorTask extends CollectorTask<SeleniumTestCollector> {
-	  private final SeleniumTestCollectorRepository seleniumTestCollectorRepository;
-	    private final TestResultRepository testResultRepository; 
+private final SeleniumTestCollectorRepository seleniumTestCollectorRepository;
+private final TestResultRepository testResultRepository; 
 private final SeleniumTestSettings seleniumTestSettings;
 	    @Autowired
 	    public SeleniumTestCollectorTask(
@@ -50,7 +52,7 @@ private final SeleniumTestSettings seleniumTestSettings;
 
 	        long start = System.currentTimeMillis();
               
-	        SeleniumTestDataFactory dataFactory = new SeleniumTestDataFactory();
+	        SeleniumTestDataFactory dataFactory = new SeleniumTestDataFactory(seleniumTestSettings);
 	        
 	        try {
 				TestResult result = dataFactory.getTestResult();
