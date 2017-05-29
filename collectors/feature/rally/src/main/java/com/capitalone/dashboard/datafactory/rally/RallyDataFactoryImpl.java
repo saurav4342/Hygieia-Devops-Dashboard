@@ -44,7 +44,7 @@ public List<Scope> getProjects() throws URISyntaxException, IOException
 	   if(response.getResults()!=null){
 	   for(JsonElement result : response.getResults()){
 		   JsonObject project = result.getAsJsonObject();
-		   if(project.get("Name").getAsString().contains("TLM")){
+		   if(project.get("Name").getAsString().contains(featureSettings.getApplicationName())){
 		  Scope scope = new Scope();
 		  scope.setpId(project.get("ObjectID").getAsString());
 		  scope.setName(project.get("Name").getAsString());

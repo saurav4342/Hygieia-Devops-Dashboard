@@ -10,7 +10,7 @@ import com.capitalone.dashboard.datafactory.DeploymentDataFactory;
 import com.capitalone.dashboard.model.BladeCollector;
 import com.capitalone.dashboard.repository.BaseCollectorRepository;
 import com.capitalone.dashboard.repository.BladeCollectorRepository;
-
+import com.capitalone.dashboard.repository.EnvironmentComponentRepository;
 import com.capitalone.dashboard.repository.EnvironmentStatusRepository;
 @Component
 public class BladeCollectorTask extends CollectorTask<BladeCollector>{
@@ -19,14 +19,14 @@ public class BladeCollectorTask extends CollectorTask<BladeCollector>{
      private final BladeSettings bladeSettings;
      private final DeploymentDataFactory dataFactory;
      private final EnvironmentStatusRepository envStatusRepository;
-     //private final EnvironmentComponentRepository envComponentRepository;
+     private final EnvironmentComponentRepository envComponentRepository;
      @Autowired
-	 public BladeCollectorTask(TaskScheduler taskScheduler, BladeCollectorRepository bladeCollectorRepository, BladeSettings bladeSettings,DeploymentDataFactory dataFactory,EnvironmentStatusRepository envStatusRepository){
+	 public BladeCollectorTask(TaskScheduler taskScheduler, BladeCollectorRepository bladeCollectorRepository, BladeSettings bladeSettings,DeploymentDataFactory dataFactory,EnvironmentStatusRepository envStatusRepository,EnvironmentComponentRepository envComponentRepository){
 		 super(taskScheduler,"BladeLogic Collector");
 	     this.bladeCollectorRepository=bladeCollectorRepository;
 	     this.bladeSettings=bladeSettings;
 	     this.dataFactory=dataFactory;
-	    // this.envComponentRepository=envComponentRepository;
+	     this.envComponentRepository=envComponentRepository;
 	     this.envStatusRepository=envStatusRepository;
 	 }
 	 
@@ -50,7 +50,7 @@ public class BladeCollectorTask extends CollectorTask<BladeCollector>{
 	    	LOGGER.info("STARTING");
 	    	LOGGER.info("Getting components");
 	    	try{
-	    	//envComponentRepository.save(dataFactory.getEnvironmentComponent());
+	    	envComponentRepository.save(dataFactory.getEnvironmentComponent());
 	    	LOGGER.info("Completed");
 	    	LOGGER.info("Getting Status");
 	    	envStatusRepository.save(dataFactory.getEnvironmentStatus());

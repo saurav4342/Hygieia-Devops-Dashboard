@@ -105,7 +105,7 @@ public class FeatureCollectorTask extends CollectorTask<FeatureCollector> {
        catch(DuplicateKeyException e){
     	   LOGGER.info(e.getMessage());
        }
-       LOGGER.info("Completed..."+featureSettings.getProjectObjectId());
+       LOGGER.info("Completed...");
     }
 
 

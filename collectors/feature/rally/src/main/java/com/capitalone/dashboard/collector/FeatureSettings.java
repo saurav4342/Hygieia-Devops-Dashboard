@@ -48,7 +48,14 @@ public class FeatureSettings {
 	private String rallyBaseUri;
 	private String rallyApiKey;
 	private int maxKanbanIterationLength;
-
+    private String applicationName;
+    
+    public String getApplicationName(){
+    	return applicationName;
+    }
+    public void setApplicationName(String applicationName){
+    	this.applicationName=applicationName;
+    }
 	public String getCron() {
 		return cron;
 	}
