@@ -6,18 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
-import com.capitalone.dashboard.collector.BladeCollectorTask;
-import com.capitalone.dashboard.model.EnvironmentComponent;
-import com.capitalone.dashboard.model.EnvironmentStatus;
-import com.capitalone.dashboard.model.SplunkEvent;
-import com.capitalone.dashboard.model.UDeployApplication;
-import com.capitalone.dashboard.repository.BladeApplicationRepository;
+import com.capitalone.dashboard.model.Deployment;
+import com.capitalone.dashboard.model.DeploymentMap;
+import com.capitalone.dashboard.model.DeploymentTask;
+import com.capitalone.dashboard.model.Host;
+import com.capitalone.dashboard.model.Pod;
 import com.splunk.HttpService;
 import com.splunk.Job;
 import com.splunk.ResultsReaderXml;
@@ -28,15 +24,13 @@ import com.splunk.ServiceArgs;
 
 @Component
 public class DeploymentDataFactoryImpl implements DeploymentDataFactory{ 
-	public List<String> components;
-	private static final Logger LOGGER = LoggerFactory.getLogger(BladeCollectorTask.class);
-	private final BladeApplicationRepository appRepository;
-    @Autowired
-	public DeploymentDataFactoryImpl( BladeApplicationRepository appRepository){
-		this.appRepository=appRepository;
+	//private final Logger LOGGER = LoggerFactory.getLogger(DeploymentDataFactoryImpl.class);
+	public DeploymentDataFactoryImpl( ){
+		
 	}
-	public List<SplunkEvent> connectToSplunk() throws InterruptedException, IOException{
-		List<SplunkEvent> splunkEventList = new ArrayList<SplunkEvent>();
+    
+	public List<DeploymentTask> connectToSplunk() throws InterruptedException, IOException{
+		List<DeploymentTask> taskList = new ArrayList<DeploymentTask>();
 	    HttpService.setSslSecurityProtocol( SSLSecurityProtocol.TLSv1_2 );
 		ServiceArgs loginArgs = new ServiceArgs();
 		loginArgs.setUsername("nayaksau");
@@ -60,85 +54,78 @@ public class DeploymentDataFactoryImpl implements DeploymentDataFactory{
 		ResultsReaderXml resultsReaderNormalSearch = new ResultsReaderXml(stream);
 		    HashMap<String, String> event;
 		    while ((event = resultsReaderNormalSearch.getNextEvent()) != null) { 
-		    	SplunkEvent splunkEvent = new SplunkEvent();
-		    	splunkEvent.setHost(event.get("hosts"));
-		    	splunkEvent.setPod(event.get("pod"));
-		    	if(event.containsKey("components")){
-		        splunkEvent.setComponents(createComponentList(event.get("components")));
+		    	DeploymentTask task = new DeploymentTask();
+		    	if(event.containsKey("hosts")){
+		    	task.setHost(event.get("hosts"));
 		    	}
-		        splunkEvent.setLastDeploymentTime(event.get("_time"));
-		        splunkEvent.setdeploymentStatus(event.get("DeploymentStatus"));
-		        splunkEvent.setDeploymentId(event.get("DeploymentID"));
-		        splunkEventList.add(splunkEvent);
+		    	if(event.containsKey("pod")){
+		    	task.setPodName(event.get("pod"));
+		    	
+		    	}
+	    	   if(event.containsKey("components")){
+		        task.setComponents(createComponentList(event.get("components")));
+		    	}
+		    	if(event.containsKey("_time")){
+		        task.setLastDeploymentTime(event.get("_time"));
+		    	}
+		    	if(event.containsKey("DeploymentStatus")){
+		        task.setDeploymentStatus(event.get("DeploymentStatus"));
+		    	}
+		    	if(event.containsKey("DeploymentID")){
+		        task.setDeploymentId(event.get("DeploymentID"));
+		    	}
+		        taskList.add(task);
 		    }
-		    return splunkEventList;
+		    return taskList;
 		}
 	public List<String> createComponentList(String components){
 		List<String> componentList = new ArrayList<String>(Arrays.asList(components.split(",")));
 		return componentList;
 	}
-	@Override
-	public List<EnvironmentComponent> getEnvironmentComponent() throws InterruptedException, IOException{
-		List<UDeployApplication> appList = new ArrayList<UDeployApplication>();
-		List<EnvironmentComponent> environmentComponentList = new ArrayList<EnvironmentComponent>();
-		List<SplunkEvent> splunkEventList = connectToSplunk();
-		for(SplunkEvent splunkEvent:splunkEventList){
-			UDeployApplication app = new UDeployApplication();
-			app.setApplicationId(splunkEvent.getPod());
-			app.setApplicationName(splunkEvent.getPod());
-			app.setDescription(splunkEvent.getPod());
-			app.setPushed(true);
-			appList.add(app);
-			if(splunkEvent.getComponents()!=null){
-				
-			for(String component:splunkEvent.getComponents()){
-				LOGGER.info(component);
-				EnvironmentComponent envComponent = new EnvironmentComponent();
-				//envComponent.setId(component);
-				envComponent.setComponentName(component);
-				envComponent.setComponentID(component);
-				//envComponent.setAsOfDate(Long.parseLong(splunkEvent.getLastDeploymentTime()));
-				envComponent.setDeployed(isDeployed(splunkEvent.getDeploymentStatus()));
-				//envComponent.setDeployTime(Long.parseLong(splunkEvent.getLastDeploymentTime()));
-				envComponent.setEnvironmentID(splunkEvent.getHost());
-				envComponent.setEnvironmentName(splunkEvent.getHost());
-				environmentComponentList.add(envComponent);
-			}
-			}
+	
+	public List<Pod> createPods(List<DeploymentTask> taskList){
+		List<Pod> podList = new ArrayList<Pod>();
+		for(DeploymentTask task:taskList){
+			Pod pod = new Pod();
+			pod.setPod(task.getPodName());
+			podList.add(pod);
 		}
-		appRepository.save(appList);
-		return environmentComponentList;
+		return podList;
 	}
-	@Override
-	public List<EnvironmentStatus> getEnvironmentStatus() throws InterruptedException, IOException{
-		List<EnvironmentStatus> environmentStatusList = new ArrayList<EnvironmentStatus>();
-		List<SplunkEvent> splunkEventList = connectToSplunk();
-		for(SplunkEvent splunkEvent:splunkEventList){
-			if(splunkEvent.getComponents()!=null){
-			for(String component:splunkEvent.getComponents()){
-				EnvironmentStatus envStatus = new EnvironmentStatus();
-				//envComponent.setId(component);
-				envStatus.setComponentID(component);
-				envStatus.setComponentName(component);
-				envStatus.setEnvironmentName(splunkEvent.getHost());
-				envStatus.setOnline(isDeployed(splunkEvent.getDeploymentStatus()));
-				envStatus.setParentAgentName(splunkEvent.getPod());
-				envStatus.setResourceName(component);
-				environmentStatusList.add(envStatus);
+	public Map<String,Deployment> createDeploymentMap(List<DeploymentTask> taskList){
+		Map<String,Deployment> deploymentMap = new HashMap<String,Deployment>();
+		for(DeploymentTask task : taskList){
+			Host host = new Host();
+			host.setHostName(task.getHost());
+			host.setComponents(task.getComponents());
+			if(deploymentMap.containsKey(task.getDeploymentId())){
+				deploymentMap.get(task.getDeploymentId()).getHosts().add(host);
 			}
+			else{
+				Deployment deployment = new Deployment();
+				Pod pod = new Pod();
+				pod.setPod(task.getPodName());
+				deployment.setPod(pod);
+				deployment.setDeploymentStatus(task.getDeploymentStatus());
+				List<Host> hostList = new ArrayList<Host>();
+				hostList.add(host);
+				deployment.setHosts(hostList);
+				deployment.setLastDeploymentTime(task.getLastDeploymentTime());
+				deploymentMap.put(task.getDeploymentId(), deployment);
 			}
 		}
-		return environmentStatusList;
+		return deploymentMap;
 	}
-	public boolean isDeployed(String deploymentStatus){
-		switch(deploymentStatus){
-		case "Good":
-		return true;
-		case "Error":
-		return false;
-        default:
-        return false;
-		
+	public List<DeploymentMap> getDeploymentMap(List<DeploymentTask> taskList){
+		Map<String,Deployment> deploymentMap = createDeploymentMap(taskList);
+		List<DeploymentMap> depMapList = new ArrayList<DeploymentMap>();
+		for(String key : deploymentMap.keySet()){
+			//LOGGER.info("key:"+key);
+			DeploymentMap map = new DeploymentMap();
+			map.setDeploymentId(key);
+			map.setDeployment(deploymentMap.get(key));
+			depMapList.add(map);
 		}
+		return depMapList;
 	}
 }

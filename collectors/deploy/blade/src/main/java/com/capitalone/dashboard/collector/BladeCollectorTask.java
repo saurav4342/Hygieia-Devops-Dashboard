@@ -1,5 +1,9 @@
 package com.capitalone.dashboard.collector;
 
+//import java.util.ArrayList;
+//import java.util.HashSet;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,26 +12,36 @@ import org.springframework.stereotype.Component;
 
 import com.capitalone.dashboard.datafactory.DeploymentDataFactory;
 import com.capitalone.dashboard.model.BladeCollector;
+import com.capitalone.dashboard.model.DeploymentMap;
+import com.capitalone.dashboard.model.DeploymentTask;
+import com.capitalone.dashboard.model.Pod;
 import com.capitalone.dashboard.repository.BaseCollectorRepository;
+import com.capitalone.dashboard.repository.DeploymentMapRepository;
 import com.capitalone.dashboard.repository.BladeCollectorRepository;
-import com.capitalone.dashboard.repository.EnvironmentComponentRepository;
-import com.capitalone.dashboard.repository.EnvironmentStatusRepository;
+import com.capitalone.dashboard.repository.PodRepository;
+
 @Component
 public class BladeCollectorTask extends CollectorTask<BladeCollector>{
 	 private static final Logger LOGGER = LoggerFactory.getLogger(BladeCollectorTask.class);
      private final BladeCollectorRepository bladeCollectorRepository;
      private final BladeSettings bladeSettings;
      private final DeploymentDataFactory dataFactory;
-     private final EnvironmentStatusRepository envStatusRepository;
-     private final EnvironmentComponentRepository envComponentRepository;
+     private final PodRepository podRepository;
+     private final DeploymentMapRepository depMapRepository;
+     
      @Autowired
-	 public BladeCollectorTask(TaskScheduler taskScheduler, BladeCollectorRepository bladeCollectorRepository, BladeSettings bladeSettings,DeploymentDataFactory dataFactory,EnvironmentStatusRepository envStatusRepository,EnvironmentComponentRepository envComponentRepository){
+	 public BladeCollectorTask(TaskScheduler taskScheduler,
+			                   PodRepository podRepository,
+			                   BladeCollectorRepository bladeCollectorRepository,
+			                   BladeSettings bladeSettings,
+			                   DeploymentDataFactory dataFactory,
+			                   DeploymentMapRepository depMapRepository){
 		 super(taskScheduler,"BladeLogic Collector");
 	     this.bladeCollectorRepository=bladeCollectorRepository;
 	     this.bladeSettings=bladeSettings;
 	     this.dataFactory=dataFactory;
-	     this.envComponentRepository=envComponentRepository;
-	     this.envStatusRepository=envStatusRepository;
+	     this.depMapRepository=depMapRepository;
+	     this.podRepository=podRepository;
 	 }
 	 
 	    @Override
@@ -48,12 +62,21 @@ public class BladeCollectorTask extends CollectorTask<BladeCollector>{
 	    @Override
 	    public void collect(BladeCollector collector) {
 	    	LOGGER.info("STARTING");
-	    	LOGGER.info("Getting components");
 	    	try{
-	    	envComponentRepository.save(dataFactory.getEnvironmentComponent());
+	    	LOGGER.info("Getting Data from Splunk..");
+	    	List<DeploymentTask> taskList = dataFactory.connectToSplunk();
+	    	LOGGER.info("Completed.");
+	    	LOGGER.info("Creating Pods..");
+	    	List<Pod> podList = dataFactory.createPods(taskList);
+	    	LOGGER.info("Saving..");
+	    	for(Pod pod:podList){
+	    	pod.setCollectorId(collector.getId());
+	    	podRepository.save(pod);
+	    	}
 	    	LOGGER.info("Completed");
-	    	LOGGER.info("Getting Status");
-	    	envStatusRepository.save(dataFactory.getEnvironmentStatus());
+	    	LOGGER.info("Creating Map");
+	    	List<DeploymentMap> mapList = dataFactory.getDeploymentMap(taskList);
+	    	depMapRepository.save(mapList);
 	    	LOGGER.info("Completed");
 	    	}
 	    	catch(Exception e){

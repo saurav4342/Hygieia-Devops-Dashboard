@@ -2,9 +2,9 @@ package com.capitalone.dashboard.model;
 
 import java.util.List;
 
-public class SplunkEvent {
+public class DeploymentTask {
 private String host;
-private String pod;
+private String podName;
 private List<String> components;
 private String lastDeploymentTime;
 private String deploymentStatus;
@@ -19,8 +19,8 @@ public void setDeploymentId(String deploymentId){
 public void setHost(String host){
 	this.host=host;
 }
-public void setPod(String pod){
-	this.pod=pod;
+public void setPodName(String podName){
+	this.podName=podName;
 }
 public void setComponents(List<String> components){
 	this.components=components;
@@ -29,15 +29,15 @@ public void setLastDeploymentTime(String lastDeploymentTime){
 	this.lastDeploymentTime=lastDeploymentTime;
 }
 
-public void setdeploymentStatus(String deploymentStatus){
+public void setDeploymentStatus(String deploymentStatus){
 	this.deploymentStatus=deploymentStatus;
 }
 
 public String getHost(){
 	return host;
 }
-public String getPod(){
-	return pod;
+public String getPodName(){
+	return podName;
 }
 public List<String> getComponents(){
 	return components;
