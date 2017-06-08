@@ -55,7 +55,7 @@ public class SplunkSettings {
 	    public String getSavedSearch(){
 	    	return savedSearch;
 	    }
-	    public void getSavedSearch(String savedSearch){
+	    public void setSavedSearch(String savedSearch){
 	    	this.savedSearch=savedSearch;
 	    }
 	}
