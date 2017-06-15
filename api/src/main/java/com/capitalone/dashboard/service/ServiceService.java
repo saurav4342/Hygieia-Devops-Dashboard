@@ -1,6 +1,8 @@
 package com.capitalone.dashboard.service;
 
 import com.capitalone.dashboard.model.Service;
+import com.capitalone.dashboard.model.SplunkEvent;
+
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -10,7 +12,7 @@ public interface ServiceService {
      *
      * @return All registered services
      */
-    Iterable<Service> all();
+    Iterable<SplunkEvent> all();
 
     /**
      * Our Services for a given Dashboard.
@@ -18,7 +20,7 @@ public interface ServiceService {
      * @param dashboardId unique id of Dashboard
      * @return services
      */
-    List<Service> dashboardServices(ObjectId dashboardId);
+    List<SplunkEvent> dashboardServices(ObjectId dashboardId);
 
     /**
      * Dependent Services for a given Dashboard.
@@ -69,7 +71,7 @@ public interface ServiceService {
      * @param serviceId id of Service
      * @return Service
      */
-    Service addDependentService(ObjectId dashboardId, ObjectId serviceId);
+   
 
     /**
      * Remove a Service dependency for a Dashboard.
@@ -78,4 +80,8 @@ public interface ServiceService {
      * @param serviceId id of Service
      */
     void deleteDependentService(ObjectId dashboardId, ObjectId serviceId);
+
+	Service addDependentService(ObjectId dashboardId, ObjectId serviceId);
+
+	
 }

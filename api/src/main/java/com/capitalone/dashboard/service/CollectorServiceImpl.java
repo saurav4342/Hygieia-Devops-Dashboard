@@ -12,6 +12,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,7 @@ import java.util.List;
 
 @Service
 public class CollectorServiceImpl implements CollectorService {
-
+private static final Logger LOGGER = LoggerFactory.getLogger(CollectorService.class);
     private final CollectorRepository collectorRepository;
     private final CollectorItemRepository collectorItemRepository;
     private final DashboardRepository dashboardRepository;
@@ -42,13 +44,12 @@ public class CollectorServiceImpl implements CollectorService {
     @Override
     public List<CollectorItem> collectorItemsByType(CollectorType collectorType) {
         List<Collector> collectors = collectorRepository.findByCollectorType(collectorType);
-
         List<ObjectId> collectorIds = Lists.newArrayList(Iterables.transform(collectors, new ToCollectorId()));
-
         List<CollectorItem> collectorItems = collectorItemRepository.findByCollectorIdIn(collectorIds);
-
+      
         for (CollectorItem options : collectorItems) {
-            options.setCollector(collectorById(options.getCollectorId(), collectors));
+            LOGGER.info(options.getDescription());
+        	options.setCollector(collectorById(options.getCollectorId(), collectors));
         }
 
         return collectorItems;

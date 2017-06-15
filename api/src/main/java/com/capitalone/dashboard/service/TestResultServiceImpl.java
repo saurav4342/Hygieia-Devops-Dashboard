@@ -1,8 +1,29 @@
 package com.capitalone.dashboard.service;
 
-import com.capitalone.dashboard.collector.CollectorTask;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.capitalone.dashboard.misc.HygieiaException;
-import com.capitalone.dashboard.model.*;
+import com.capitalone.dashboard.model.Collector;
+import com.capitalone.dashboard.model.CollectorItem;
+import com.capitalone.dashboard.model.CollectorType;
+import com.capitalone.dashboard.model.Component;
+import com.capitalone.dashboard.model.DataResponse;
+import com.capitalone.dashboard.model.QTestResult;
+import com.capitalone.dashboard.model.TestCapability;
+import com.capitalone.dashboard.model.TestCase;
+import com.capitalone.dashboard.model.TestResult;
+import com.capitalone.dashboard.model.TestSuite;
 import com.capitalone.dashboard.repository.CollectorRepository;
 import com.capitalone.dashboard.repository.ComponentRepository;
 import com.capitalone.dashboard.repository.TestResultRepository;
@@ -11,20 +32,6 @@ import com.capitalone.dashboard.request.TestDataCreateRequest;
 import com.capitalone.dashboard.request.TestResultRequest;
 import com.google.common.collect.Lists;
 import com.mysema.query.BooleanBuilder;
-import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class TestResultServiceImpl implements TestResultService {
@@ -33,7 +40,7 @@ public class TestResultServiceImpl implements TestResultService {
     private final ComponentRepository componentRepository;
     private final CollectorRepository collectorRepository;
     private final CollectorService collectorService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(CollectorTask.class);
+   
     @Autowired
     public TestResultServiceImpl(TestResultRepository testResultRepository,
                                  ComponentRepository componentRepository,
@@ -53,9 +60,7 @@ public class TestResultServiceImpl implements TestResultService {
         }
         List<TestResult> result = new ArrayList<>();
         validateAllCollectorItems(request, component, result);
-        for(TestResult results:result){
-        	LOGGER.info(results.getDescription());
-        }
+      
         //One collector per Type. get(0) is hardcoded.
         if (!CollectionUtils.isEmpty(component.getCollectorItems().get(CollectorType.Test)) && (component.getCollectorItems().get(CollectorType.Test).get(0) != null)) {
             Collector collector = collectorRepository.findOne(component.getCollectorItems().get(CollectorType.Test).get(0).getCollectorId());
@@ -84,7 +89,6 @@ public class TestResultServiceImpl implements TestResultService {
 
             // add all test result repos
             addAllTestResultRepositories(request, result, testResult, builder);
-            
         }
     }
 
