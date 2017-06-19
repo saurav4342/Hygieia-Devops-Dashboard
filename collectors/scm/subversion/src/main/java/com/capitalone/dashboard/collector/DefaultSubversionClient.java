@@ -78,10 +78,10 @@ public class DefaultSubversionClient implements SubversionClient {
     }
 
     private SVNRepository getSvnRepository(String url) throws SVNException {
-    	String userUrl = settings.getUrl();
+    	//String userUrl = settings.getUrl();
     	String userName=settings.getUsername();
     	String password = settings.getPassword();
-        SVNRepository repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(userUrl));
+        SVNRepository repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url));
         ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(
                 userName, password);
        ///LOG.info(settings.getPassword());
