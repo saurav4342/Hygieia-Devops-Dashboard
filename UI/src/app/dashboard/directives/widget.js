@@ -25,8 +25,8 @@
         })
         .directive('widget', widgetDirective);
 
-    widgetDirective.$inject = ['$controller', '$http', '$templateCache', '$compile', 'widgetManager', '$uibModal', 'WidgetState', 'DisplayState', '$interval', 'dashboardData','userService'];
-    function widgetDirective($controller, $http, $templateCache, $compile, widgetManager, $uibModal, WidgetState, DisplayState, $interval, dashboardData, userService) {
+    widgetDirective.$inject = ['$controller', '$http', '$templateCache', '$compile', 'widgetManager', '$modal', 'WidgetState', 'DisplayState', '$interval', 'dashboardData','$cookies'];
+    function widgetDirective($controller, $http, $templateCache, $compile, widgetManager, $modal, WidgetState, DisplayState, $interval, dashboardData,$cookies) {
         return {
             templateUrl: 'app/dashboard/views/widget.html',
             require: '^widgetContainer',
@@ -104,14 +104,33 @@
             };
 
             $scope.lastUpdatedDisplay = '';
-            $scope.collectorItems = null;
-            $scope.collectionError = false;
 
             // public methods
             $scope.configModal = configModal;
-            $scope.hasPermission = hasPermission;
             $scope.setState = setState;
             $scope.init = init;
+            $scope.checkPermission=checkPermission;
+
+            function checkPermission(){
+
+                dashboardData.myowner($scope.dashboard.title).then(processmyownerresponse);
+
+
+            }
+
+            function processmyownerresponse(data)
+            {
+
+                $scope.owner=data;
+                if ($scope.owner == $cookies.username || $cookies.username == 'admin')
+                {
+                    configModal();
+                }
+                else
+                {
+                    $scope.alerts.push({type: 'info', msg: 'You are not authorized'});
+                }
+            }
 
             // method implementations
             function configModal() {
@@ -131,13 +150,7 @@
 
                 // when the widget closes if an object is passed we'll assume it's an updated
                 // widget configuration so try and send it to the api or update the existing one
-                $uibModal.open(modalConfig).result.then(upsertWidget);
-            }
-
-            function hasPermission() {
-            	var dashboard = $scope.dashboard;
-
-            	return userService.hasDashboardConfigPermission(dashboard.owner, dashboard.owners);
+                $modal.open(modalConfig).result.then(upsertWidget);
             }
 
             function upsertWidget(newWidgetConfig) {
@@ -151,6 +164,7 @@
                         delete $scope.widgetConfig.collectorItemId;
                     }
 
+                    console.log('New Widget Config', $scope.widgetConfig);
                     dashboardData
                         .upsertWidget($scope.dashboard.id, $scope.widgetConfig)
                         .then(function (response) {
@@ -161,7 +175,7 @@
 
                             // add or update the widget from the response.
                             // required when a new widget id is created
-                            if(response.widget !== null && typeof response.widget === 'object') {
+                            if(response.widget !== null && typeof response.widget == 'object') {
                                 angular.extend($scope.widgetConfig, response.widget);
                             }
 
@@ -183,7 +197,7 @@
                 stopInterval();
 
                 // don't request if widget is not in the read state
-                if ($scope.state !== WidgetState.READY) {
+                if ($scope.state != WidgetState.READY) {
                     return;
                 }
 
@@ -243,14 +257,7 @@
                 if (load && load.then) {
                     load.then(function(result) {
                         var lastUpdated = angular.isArray(result) ? _.max(result) : result;
-                        var collectorItems = result.collectorItem;
                         $scope.lastUpdatedDisplay = moment(lastUpdated).dash('ago');
-                        $scope.collectorItems = collectorItems;
-                        if (collectorItems) {
-                            for (var i = 0; (i < collectorItems.length) && !$scope.collectionError ; i++ ) {
-                                $scope.collectionError = collectorItems[i].errors.length > 0;
-                            }
-                        }
                     });
                 }
             }

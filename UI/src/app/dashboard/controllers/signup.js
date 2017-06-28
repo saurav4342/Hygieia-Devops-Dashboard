@@ -7,8 +7,8 @@
         .module(HygieiaConfig.module)
         .controller('SignupController', SignupController);
 
-    SignupController.$inject = ['$scope', 'authService', '$location'];
-    function SignupController($scope, authService, $location) {
+    SignupController.$inject = ['$scope', 'signupData', '$location', '$cookies'];
+    function SignupController($scope, signupData, $location, $cookies) {
         var signup = this;
 
         // public variables
@@ -31,25 +31,18 @@
 
         function doSignup(valid) {
             if (valid) {
-                authService.register({username:document.suf.id.value, password:document.suf.password.value}).then(processSuccessfulResponse, processFailureResponse);
+                signupData.signup(document.suf.id.value, document.suf.password.value).then(processResponse);
             }
         }
 
         function doLogin() {
-            $location.path('/login');
-        }
-
-        function processSuccessfulResponse(response) {
             $location.path('/');
         }
 
-        function processFailureResponse(response) {
-          $scope.suf.id.$setValidity('exists', false);
-          signup.userCreated = false;
-        }
-
-        $scope.resetUsernameFieldValidity = function () {
-          $scope.suf.id.$setValidity('exists', true);
+        function processResponse(data) {
+            var exists = data == 'User already exists';
+            $scope.suf.id.$setValidity('exists', !exists);
+            signup.userCreated = !exists;
         }
 
     }

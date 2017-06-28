@@ -3,14 +3,16 @@
         <tr class="dash-row clickable" ng-repeat="environment in deployView.environments" ng-click="deployView.showDetail(environment)">
             <td>
                 <span
-                        dash-status="{{environment.failedComponents > 0 ? deployView.statuses.FAIL : deployView.statuses.PASS}}"
-                        dash-status-fail-text="{{environment.failedComponents}}"></span>
+                        dash-status="{{environment.failedComponents > 0 ? 
+                        	(environment.ignoreFailure? deployView.statuses.IGNORE : deployView.statuses.FAIL) : deployView.statuses.PASS}}"
+                        dash-status-fail-text="{{environment.failedComponents}}"
+                        dash-status-ignore-text="{{environment.failedComponents}}"></span>
             </td>
             <td class="dash-overflow environment-name">
                 {{environment.name}}
             </td>
             <td class="text-standard-date">
-                {{environment.lastUpdated | fromNow}}
+                {{environment.units[0].lastUpdated | fromNow}}
             </td>
             <td class="server-count" ng-class="{'servers-up' : environment.serverUpCount > 0}">
                 {{environment.serverUpCount}}

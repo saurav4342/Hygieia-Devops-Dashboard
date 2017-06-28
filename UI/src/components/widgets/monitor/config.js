@@ -125,7 +125,6 @@
 
         function save() {
             var dashboardId = modalData.dashboard.id;
-			
             var promises = [];
 
             function whereName(data) {

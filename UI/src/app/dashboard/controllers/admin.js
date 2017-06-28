@@ -9,11 +9,15 @@
         .controller('AdminController', AdminController);
 
 
-    AdminController.$inject = ['$scope', 'dashboardData', '$location','$uibModal', 'userService', 'authService', 'userData'];
-    function AdminController($scope, dashboardData, $location, $uibModal, userService, authService, userData) {
+    AdminController.$inject = ['dashboardData', '$cookies', '$cookieStore', '$location'];
+    function AdminController(dashboardData, $cookies, $cookieStore, $location) {
         var ctrl = this;
-        if (userService.isAuthenticated() && userService.isAdmin()) {
+
+        console.log("I am in admin page run scope");
+        if ($cookies.username == 'admin') {
+            console.log("I am admin");
             $location.path('/admin');
+
         }
         else {
             console.log("Not authenticated redirecting");
@@ -21,15 +25,9 @@
         }
 
         ctrl.storageAvailable = localStorageSupported;
-        ctrl.showAuthentication = userService.isAuthenticated();
         ctrl.templateUrl = "app/dashboard/views/navheader.html";
-        ctrl.username = userService.getUsername();
-        ctrl.authType = userService.getAuthType();
-        ctrl.login = login;
+        ctrl.username = $cookies.username;
         ctrl.logout = logout;
-        ctrl.renameDashboard=renameDashboard;
-
-        $scope.tab="dashboards";
 
         // list of available themes. Must be updated manually
         ctrl.themes = [
@@ -65,17 +63,13 @@
 
         // request dashboards
         dashboardData.search().then(processResponse);
-        userData.getAllUsers().then(processUserResponse);
 
 
         //implementation of logout
         function logout() {
-            authService.logout();
-            $location.path("/login");
-        }
-
-        function login() {
-          $location.path("/login")
+            $cookieStore.remove("username");
+            $cookieStore.remove("authenticated");
+            $location.path("/");
         }
 
         // method implementations
@@ -92,31 +86,6 @@
             });
         }
 
-        function renameDashboard(item)
-        {
-            console.log("Rename Dashboard in Admin");
-
-            var mymodalInstance=$uibModal.open({
-                templateUrl: 'app/dashboard/views/renameDashboard.html',
-                controller: 'RenameDashboardController',
-                controllerAs: 'ctrl',
-                resolve: {
-                    dashboardId: function() {
-                        return item.id;
-                    },
-                    dashboardName: function() {
-                        return item.name;
-                    }
-                }
-            });
-
-            mymodalInstance.result.then(function(condition) {
-                window.location.reload(false);
-            });
-
-        }
-
-
         function processResponse(data) {
             ctrl.dashboards = [];
             for (var x = 0; x < data.length; x++) {
@@ -126,45 +95,5 @@
                 });
             }
         }
-
-        function processUserResponse(response) {
-            $scope.users = response.data;
-        }
-
-        $scope.navigateToTab = function(tab) {
-          $scope.tab=tab;
-        }
-
-        $scope.isActiveUser = function(user) {
-          if(user.authType === ctrl.authType && user.username === ctrl.username) {
-            return true;
-          }
-          return false;
-        }
-
-        $scope.promoteUserToAdmin = function(user) {
-          userData.promoteUserToAdmin(user).then(
-            function(response) {
-              var index = $scope.users.indexOf(user);
-              $scope.users[index] = response.data;
-            },
-            function(error) {
-              $scope.error = error;
-            }
-        );
-        }
-
-        $scope.demoteUserFromAdmin = function(user) {
-          userData.demoteUserFromAdmin(user).then(
-            function(response) {
-              var index = $scope.users.indexOf(user);
-              $scope.users[index] = response.data;
-            },
-            function(error) {
-              $scope.error = error;
-            }
-        );
-        }
-
     }
 })();

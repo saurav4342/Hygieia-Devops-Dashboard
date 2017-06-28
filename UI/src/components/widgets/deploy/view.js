@@ -13,6 +13,10 @@
         // public variables
         ctrl.environments = [];
         ctrl.statuses = DashStatus;
+        ctrl.ignoreEnvironmentFailuresRegex=/^$/;
+        if ($scope.widgetConfig.options.ignoreRegex !== undefined && $scope.widgetConfig.options.ignoreRegex !== null && $scope.widgetConfig.options.ignoreRegex !== '') {
+            ctrl.ignoreEnvironmentFailuresRegex=new RegExp($scope.widgetConfig.options.ignoreRegex.replace(/^"(.*)"$/, '$1'));
+        }
 
         ctrl.load = load;
         ctrl.showDetail = showDetail;
@@ -51,13 +55,20 @@
                 getEnvironments: getEnvironments,
                 getIsDefaultState: getIsDefaultState
             };
+            
+            var ignoreEnvironmentFailuresRegex = ctrl.ignoreEnvironmentFailuresRegex;
+            
+            function ignoreEnvironmentFailures(environment) {
+            	return ignoreEnvironmentFailuresRegex.test(environment.name);
+            }
 
             function getIsDefaultState(data, cb) {
                 var isDefaultState = true;
                 _(data).forEach(function (environment) {
                     var offlineUnits = _(environment.units).where({'deployed': false}).value().length;
 
-                    if(environment.units && environment.units.length == offlineUnits) {
+                    if(environment.units && environment.units.length == offlineUnits
+                    		&& !ignoreEnvironmentFailures(environment)) {
                         isDefaultState = false;
                     }
                 });
@@ -71,11 +82,12 @@
                     return {
                         name: item.name,
                         url: item.url,
-                        units: item.units,
-                        serverUpCount: getServerOnlineCount(item.units, true),
-                        serverDownCount: getServerOnlineCount(item.units, false),
-                        failedComponents: getFailedComponentCount(item.units),
-                        lastUpdated: getLatestUpdate(item.units)
+                        units: item.newUnits,
+                        serverUpCount: getServerOnlineCount(item.newUnits, true),
+                        serverDownCount: getServerOnlineCount(item.newUnits, false),
+                        failedComponents: getFailedComponentCount(item.newUnits),
+                        ignoreFailure: ignoreEnvironmentFailures(item),
+                        lastUpdated: getLatestUpdate(item.newUnits)
                     };
 
                     function getFailedComponentCount(units) {

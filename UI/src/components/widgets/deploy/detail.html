@@ -2,15 +2,17 @@
     <div class="widget-detail deploy-detail">
         <div class="widget-detail-heading">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <span class="dash-status-lg"
-                          dash-status="{{detail.environment.failedComponents > 0 ? detail.statuses.FAIL : detail.statuses.PASS}}"
-                          dash-status-fail-text="{{detail.environment.failedComponents}}"></span>
+                          dash-status="{{detail.environment.failedComponents > 0 ? 
+                        	(detail.environment.ignoreFailure? detail.statuses.IGNORE : detail.statuses.FAIL) : detail.statuses.PASS}}"
+                          dash-status-fail-text="{{detail.environment.failedComponents}}"
+                          dash-status-ignore-text="{{detail.environment.failedComponents}}"></span>
                     <span class="environment-name">{{::detail.environment.name}}</span>
                 </div>
 
                 <div class="col-md-3 last-updated">
-                    <span>{{::detail.environment.lastUpdated | date:'MMM d, HH:mm:ss'}}</span>
+                    <span>{{::detail.environment.units[0].lastUpdated | date:'MMM d, HH:mm:ss'}}</span>
                 </div>
 
                 <div class="col-md-2 server-count">
@@ -21,10 +23,10 @@
                         {{detail.environment.serverDownCount}}<span class="fa fa-arrow-down"></span>
                     </span>
                 </div>
-                <div class="col-md-3 view-in-tool">
-                    <a ng-href="{{::detail.environment.url}}" target="_blank">
-                        View in {{::detail.collectorName }} <span class="fa fa-angle-right"></span>
-                    </a>
+                <div class="col-md-4 view-in-tool">
+                    
+                        ID: {{::detail.environment.url }}
+                    
                 </div>
             </div>
 
@@ -34,25 +36,47 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th colspan="2">Component</th>
+                        <th colspan="2">Deploy status</th>
                         <th>Time</th>
                         <th>Version</th>
-                        <th colspan="2">Resource</th>
+                        <th colspan="2">Server</th>
                     </tr>
                 </thead>
                 <tbody ng-repeat="unit in detail.environment.units | orderBy:['deployed', 'name'] track by $index">
+				
                     <tr ng-repeat="server in unit.servers | orderBy:['online', 'name'] track by $index">
-                        <td dash-status="{{unit.deployed}}"></td>
-                        <td>{{::unit.name}}</td>
+                        <td dash-status="{{unit.deployed? detail.statuses.PASS : (detail.environment.ignoreFailure? detail.statuses.IGNORE : detail.statuses.FAIL)}}"></td>
+                        <td ng-if="unit.jobUrl">
+                            <a ng-href="{{::unit.jobUrl}}" target="_blank">
+                                {{::unit.name}} <span class="fa fa-angle-right"></span>
+                            </a>
+                        </td>
+                        <td ng-if="!unit.jobUrl">{{::unit.name}}</td>
                         <td>{{::unit.lastUpdated | date:'MMM d, HH:mm:ss'}}</td>
                         <td>{{::unit.version}}</td>
-                        <td>{{::server.name}}</td>
+                        <td>{{::server.hostName}}</td>
+						<td>Show Components: <input type="checkbox" ng-model="myVar">
+							
+                            <div class="well" ng-show="myVar">
+                             <ul ng-repeat="component in server.components" class="list-unstyled">
+							 <li ng-show="server.online" class=""> <span  class="servers-up fa fa-arrow-up"></span><span ng-hide="server.online" class="servers-down fa fa-arrow-down"></span> {{component}}</li>
+							 <li ng-hide="server.online" class=""><span class= "servers-down fa fa-arrow-down"></span> {{component}}</li>
+							 </ul>
+                            </div>
+                            
+							</td>
                         <td ng-show="server.online" class="servers-up"><span class="fa fa-arrow-up"></span></td>
                         <td ng-hide="server.online" class="servers-down"><span class="fa fa-arrow-down"></span></td>
+						
                     </tr>
                     <tr ng-if="!unit.servers || unit.servers.length === 0">
-                        <td dash-status="{{unit.deployed}}"></td>
-                        <td>{{::unit.name}}</td>
+                        <td dash-status="{{unit.deployed? detail.statuses.PASS : (detail.environment.ignoreFailure? detail.statuses.IGNORE : detail.statuses.FAIL)}}"></td>
+                        <td ng-if="unit.jobUrl">
+                            <a ng-href="{{::unit.jobUrl}}" target="_blank">
+                                {{::unit.name}} <span class="fa fa-angle-right"></span>
+                            </a>
+                        </td>
+                        <td ng-if="!unit.jobUrl">{{::unit.name}}</td>
                         <td>{{::unit.lastUpdated | date:'MMM d, HH:mm:ss'}}</td>
                         <td>{{::unit.version}}</td>
                         <td colspan="2">N/A</td>

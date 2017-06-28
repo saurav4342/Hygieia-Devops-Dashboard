@@ -3,31 +3,64 @@
 (function () {
     'use strict';
     var app = angular.module(HygieiaConfig.module)
-    var inject = ['$http', '$location', '$scope', 'authService', 'userService', 'loginRedirectService']
-    function LoginController($http, $location, $scope, authService, userService, loginRedirectService) {
-        if (userService.isAuthenticated()) {
-            $location.path('/');
+    var inject = ['$cookies', '$http', '$location', '$scope', 'loginData']
+    function LoginController($cookies, $http, $location, $scope, loginData) {
+        if ($cookies.authenticated) {
+            $location.path('/site');
             return;
         }
         var login = this;
-        $scope.isStandardLogin = true;
+        login.showAuthentication = $cookies.authenticated;
         login.templateUrl = 'app/dashboard/views/navheader.html';
+        login.apiup = false;
+        login.username = '';
+        login.password = '';
         login.invalidUsernamePassword = false;
+        login.appVersion='';
 
-        $scope.showStandard = function () {
-          $scope.isStandardLogin = true;
-        }
 
-        $scope.showLdap = function () {
-          $scope.isStandardLogin = false;
-        }
-
-        var signup = function () {
+        login.doLogin = function () {
+            $scope.lg.username.$setValidity('invalidUsernamePassword', true);
+            var valid = $scope.lg.$valid;
+            if (valid) {
+                loginData.login(login.username, login.password)
+                    .then(function (data) {
+                        $scope.lg.username.$setValidity(
+                          'invalidUsernamePassword',
+                          data
+                        );
+                        if (data) {
+                            $cookies.authenticated = true;
+                            $cookies.username = login.username;
+                            $location.path('/site');
+                        }
+                    });
+            }
+        };
+        login.doSignup = function () {
             $location.path('/signup');
         };
+        function checkApi() {
+            var url = '/api/dashboard';
+            $http.get(url).success(function (data, status) {
+                login.apiup = (status == 200);
+            }).error(function (data, status) {
+                login.apiup = false;
+            });
+        }
+        checkApi();
 
-        $scope.standardLogin = { name: 'Standard Login', login: authService.login, signup: signup };
-        $scope.ldapLogin = { name: 'Ldap Login', login: authService.loginLdap };
+        function getAppVersion(){
+            var url = '/api/appinfo';
+            $http.get(url).success(function (data, status) {
+                console.log("appinfo:"+data);
+                login.appVersion=data;
+            }).error(function(data,status){
+                console.log("appInfo:"+data);
+                login.appVersion="0.0";
+            });
+        }
+        getAppVersion();
 
     }
     app.controller('LoginController', inject.concat([LoginController]));
