@@ -14,11 +14,13 @@ import com.capitalone.dashboard.datafactory.DeploymentDataFactory;
 import com.capitalone.dashboard.model.BladeCollector;
 import com.capitalone.dashboard.model.DeploymentMap;
 import com.capitalone.dashboard.model.DeploymentTask;
-import com.capitalone.dashboard.model.Pod;
+import com.capitalone.dashboard.model.PodVersionMap;
+import com.capitalone.dashboard.model.UDeployApplication;
 import com.capitalone.dashboard.repository.BaseCollectorRepository;
-import com.capitalone.dashboard.repository.DeploymentMapRepository;
 import com.capitalone.dashboard.repository.BladeCollectorRepository;
-import com.capitalone.dashboard.repository.PodRepository;
+import com.capitalone.dashboard.repository.DeploymentMapRepository;
+import com.capitalone.dashboard.repository.PodVersionMapRepository;
+import com.capitalone.dashboard.repository.UDeployApplicationRepository;
 
 @Component
 public class BladeCollectorTask extends CollectorTask<BladeCollector>{
@@ -26,22 +28,26 @@ public class BladeCollectorTask extends CollectorTask<BladeCollector>{
      private final BladeCollectorRepository bladeCollectorRepository;
      private final BladeSettings bladeSettings;
      private final DeploymentDataFactory dataFactory;
-     private final PodRepository podRepository;
-     private final DeploymentMapRepository depMapRepository;
+     private final UDeployApplicationRepository uDeployApplicationRepository;
+     private final DeploymentMapRepository deploymentMapRepository;
+     private final PodVersionMapRepository podVersionMapRepository;
      
      @Autowired
 	 public BladeCollectorTask(TaskScheduler taskScheduler,
-			                   PodRepository podRepository,
+			                   UDeployApplicationRepository uDeployApplicationRepository,
 			                   BladeCollectorRepository bladeCollectorRepository,
 			                   BladeSettings bladeSettings,
 			                   DeploymentDataFactory dataFactory,
-			                   DeploymentMapRepository depMapRepository){
+			                   DeploymentMapRepository deploymentMapRepository,
+			                   PodVersionMapRepository podVersionMapRepository
+			                   ){
 		 super(taskScheduler,"BladeLogic Collector");
-	     this.bladeCollectorRepository=bladeCollectorRepository;
-	     this.bladeSettings=bladeSettings;
-	     this.dataFactory=dataFactory;
-	     this.depMapRepository=depMapRepository;
-	     this.podRepository=podRepository;
+	     this.bladeCollectorRepository = bladeCollectorRepository;
+	     this.bladeSettings = bladeSettings;
+	     this.dataFactory = dataFactory;
+	     this.deploymentMapRepository = deploymentMapRepository;
+	     this.uDeployApplicationRepository = uDeployApplicationRepository;
+	     this.podVersionMapRepository = podVersionMapRepository;
 	 }
 	 
 	    @Override
@@ -65,19 +71,28 @@ public class BladeCollectorTask extends CollectorTask<BladeCollector>{
 	    	try{
 	    	LOGGER.info("Getting Data from Splunk..");
 	    	List<DeploymentTask> taskList = dataFactory.connectToSplunk();
-	    	LOGGER.info("Completed.");
-	    	LOGGER.info("Creating Pods..");
-	    	List<Pod> podList = dataFactory.createPods(taskList);
-	    	LOGGER.info("Saving..");
-	    	for(Pod pod:podList){
-	    	pod.setCollectorId(collector.getId());
-	    	podRepository.save(pod);
-	    	}
-	    	LOGGER.info("Completed");
+	    	LOGGER.info("Getting Version Data");
+	    	List<PodVersionMap> podVersionMapList = dataFactory.getVersionData();
+	    	LOGGER.info("Saving");
+	    	podVersionMapRepository.deleteAll();
+	    	podVersionMapRepository.save(podVersionMapList);
 	    	LOGGER.info("Creating Map");
-	    	List<DeploymentMap> mapList = dataFactory.getDeploymentMap(taskList);
-	    	depMapRepository.save(mapList);
-	    	LOGGER.info("Completed");
+	    	List<DeploymentMap> mapList = dataFactory.getDeploymentMap(taskList,podVersionMapList);
+	    	List<UDeployApplication> podList = dataFactory.createPods(mapList);
+	    	for(UDeployApplication pod:podList){
+	    		if(uDeployApplicationRepository.findByDescription(pod.getDescription()).isEmpty()){
+	    			pod.setCollectorId(collector.getId());
+		    	uDeployApplicationRepository.save(pod);
+	    		}
+		    	}
+	    	LOGGER.info("Saving..");
+	    	deploymentMapRepository.deleteAll();
+	    	for(DeploymentMap map : mapList){
+	    	    
+	    		deploymentMapRepository.save(map);
+	    	}
+	    	LOGGER.info("Completed.");
+	    	
 	    	}
 	    	catch(Exception e){
 	    		LOGGER.error("error", e);

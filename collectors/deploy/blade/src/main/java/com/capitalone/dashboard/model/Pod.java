@@ -1,6 +1,6 @@
 package com.capitalone.dashboard.model;
 
-public class Pod extends CollectorItem{
+public class Pod{
 private String podName;
 
 public String getPod(){

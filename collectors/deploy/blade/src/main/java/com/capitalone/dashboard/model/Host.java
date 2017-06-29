@@ -5,6 +5,8 @@ import java.util.List;
 public class Host {
 private String hostName;
 private List<String> components;
+private String deploymentStatus;
+private boolean isOnline;
 
 public String getHostName(){
 	return hostName;
@@ -20,5 +22,17 @@ public List<String> getComponents(){
 public void setComponents(List<String> components){
 	this.components=components;
 }
+public void setDeploymentStatus(String deploymentStatus){
+	this.deploymentStatus = deploymentStatus;
+}
 
+public String getDeploymentStatus(){
+	return deploymentStatus;
+}
+public boolean isOnline(){
+	return isOnline;
+}
+public void setOnline(boolean isOnline){
+	this.isOnline = isOnline;
+}
 }

@@ -3,8 +3,6 @@ package com.capitalone.dashboard.collector;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * Bean to hold settings specific to the UDeploy collector.
  */
@@ -14,9 +12,11 @@ public class BladeSettings {
     private String cron;
     private String username;
     private String password;
-    private List<String> servers;
-    private List<String> niceNames;
-
+    private String url;
+    private String command;
+    private String splunkApp;
+    private String savedSearch;
+    
     public String getCron() {
         return cron;
     }
@@ -41,19 +41,31 @@ public class BladeSettings {
         this.password = password;
     }
 
-    public List<String> getServers() {
-        return servers;
+    public String getUrl() {
+        return url;
     }
 
-    public void setServers(List<String> servers) {
-        this.servers = servers;
+    public void setUrl(String url) {
+        this.url = url;
     }
     
-    public List<String> getNiceNames() {
-    	return niceNames;
+    public String getCommand() {
+    	return command;
     }
     
-    public void setNiceNames(List<String> niceNames) {
-    	this.niceNames = niceNames;
+    public void setCommand(String command) {
+    	this.command = command;
+    }
+    public void setSplunkApp(String splunkApp){
+    	this.splunkApp = splunkApp;
+    }
+    public String getSplunkApp(){
+    	return splunkApp;
+    }
+    public void setSavedSearch(String savedSearch){
+    	this.savedSearch = savedSearch;
+    }
+    public String getSavedSearch(){
+    	return savedSearch;
     }
 }
