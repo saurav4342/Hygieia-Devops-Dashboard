@@ -1,5 +1,13 @@
 package com.capitalone.dashboard.service;
 
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.capitalone.dashboard.misc.HygieiaException;
 import com.capitalone.dashboard.model.Collector;
 import com.capitalone.dashboard.model.CollectorItem;
@@ -11,18 +19,10 @@ import com.capitalone.dashboard.repository.DashboardRepository;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
 
 @Service
 public class CollectorServiceImpl implements CollectorService {
-private static final Logger LOGGER = LoggerFactory.getLogger(CollectorService.class);
+
     private final CollectorRepository collectorRepository;
     private final CollectorItemRepository collectorItemRepository;
     private final DashboardRepository dashboardRepository;
@@ -48,10 +48,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(CollectorService.cl
         List<CollectorItem> collectorItems = collectorItemRepository.findByCollectorIdIn(collectorIds);
       
         for (CollectorItem options : collectorItems) {
-            LOGGER.info(options.getDescription());
         	options.setCollector(collectorById(options.getCollectorId(), collectors));
         }
-
         return collectorItems;
     }
 
